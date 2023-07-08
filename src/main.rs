@@ -1,38 +1,27 @@
-use std::fs;
+use std::fs::File;
+use std::io::{self, BufRead};
 
-const TODO: &str = "- [ ]";
-const DONE: &str = "- [x]";
-const TAB:  &str = "\t";
+mod parser;
+use crate::parser::{
+    MarkdownElement,
+    parse
+};
 
-fn parse (contents: String) {
-    let todos: Vec<&str> = contents.lines()
-        .filter(|s| s.starts_with(TODO))
-        .collect();
-    
-    let sub_tasks: Vec<&str> = contents.lines()
-        .filter(|s| s.starts_with(&(TAB.to_owned() + TODO)))
-        .collect();
+fn main() -> io::Result<()> {
+    let file = File::open("../../Documents/obsidian.main/To-do.md")?;
+    let reader = io::BufReader::new(file);
 
-    let dones: Vec<&str> = contents.lines()
-        .filter(|s| s.starts_with(DONE))
-        .collect();
+    let mut elements: Vec<MarkdownElement> = Vec::new();
 
-
-    println!("tasks:");
-    for todo in todos {
-        println!("\t{}", todo)    
+    for line in reader.lines() {
+        let line = line?;
+        let element = parse(line);
+        elements.push(element);
     }
 
-    println!("done :");
-    for done in dones {
-        println!("\t{}", done)
+    for elem in elements {
+        println!("{:?}", elem)
     }
-}
 
-fn main() {
-    let path: &str = "../../Documents/obsidian.main/To-do.md";
-    let tasks: Result<String, std::io::Error> = fs::read_to_string(path);
-
-    parse(tasks.unwrap());
-    println!("read from : {}", path);
+    Ok(())
 }
