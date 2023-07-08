@@ -33,5 +33,6 @@ fn main() {
     let path: &str = "../../Documents/obsidian.main/To-do.md";
     let tasks: Result<String, std::io::Error> = fs::read_to_string(path);
 
-    parse(tasks.unwrap())
+    parse(tasks.unwrap());
+    println!("read from : {}", path);
 }
