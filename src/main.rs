@@ -8,7 +8,7 @@ use crate::parser::{
 };
 
 fn main() -> io::Result<()> {
-    let file = File::open("../../Documents/obsidian.main/To-do.md")?;
+    let file = File::open("file path here")?;
     let reader = io::BufReader::new(file);
 
     let mut elements: Vec<MarkdownElement> = Vec::new();
@@ -20,7 +20,7 @@ fn main() -> io::Result<()> {
     }
 
     for elem in elements {
-        println!("{:?}", elem)
+        println!("{:#?}", elem)
     }
 
     Ok(())
