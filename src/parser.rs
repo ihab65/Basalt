@@ -1,40 +1,48 @@
 #[derive(Debug)]
 pub enum MarkdownElement {
-    Note(String), Title(String), SubTask(String), Emtpy ,
-    Task(String), Other(String), SubDone(String),
-    Done(String), Line         , SubNote(String),
+    Note, Title, SubTask, Emtpy,
+    Task, Other, SubDone,
+    Done, Line , SubNote,
 }
 
 
-pub fn parse(line: String) -> MarkdownElement {
+pub fn parse_line(line: String) -> (MarkdownElement, String) {
     match line {
-        l if l.starts_with("---") => MarkdownElement::Line,
-        l if l.is_empty() => MarkdownElement::Emtpy,
+        l if l.starts_with("---") => (MarkdownElement::Line, String::from("---")),
+        l if l.is_empty() => (MarkdownElement::Emtpy, String::from("")),
 
         l if l.starts_with("- [ ]") => {
-            MarkdownElement::Task(l[5..].trim().to_string())
+            let text = l[5..].trim().to_string();
+            (MarkdownElement::Task, text)
         },
 
         l if l.starts_with("\t- [ ]") => {
-            MarkdownElement::SubTask(l[6..].trim().to_string())
+            let text = l[6..].trim().to_string();
+            (MarkdownElement::SubTask, text)
         },
 
         l if l.starts_with("- [x]") => {
-            MarkdownElement::Done(l[5..].trim().to_string())
+            let text = l[5..].trim().to_string();
+            (MarkdownElement::Done, text) 
         },
 
         l if l.starts_with("\t- [x]") => {
-            MarkdownElement::SubDone(l[6..].trim().to_string())
+            let text = l[6..].trim().to_string();
+            (MarkdownElement::SubDone, text)
         },
 
         l if l.starts_with('-') => {
-            MarkdownElement::Note(l[1..].trim().to_string())
+            let text = l[1..].trim().to_string();
+            (MarkdownElement::Note, text)
         },
         l if l.starts_with("\t-") => {
-            MarkdownElement::SubNote(l[2..].trim().to_string())
+            let text = l[2..].trim().to_string();
+            (MarkdownElement::SubNote, text)
         },
         
-        l if l.starts_with('#') => MarkdownElement::Title(l.trim_matches('#').trim().to_string()),
-        _ => MarkdownElement::Other(line),
+        l if l.starts_with('#') => {
+            (MarkdownElement::Title, l.trim_matches('#').trim().to_string())
+        },
+        _ => (MarkdownElement::Other, String::from("not defined yet"))
     }
 }
