@@ -1,9 +1,11 @@
-use std::io::{self, Read, Write};
-use std::fs::{File, self};
-use std::path::Path;
-use clap::{arg, Args};
+#[allow(deprecated)]
 
-const SAVE_FILE_PATH: &str = ".basalt/.path";
+use std::io::{self, Read, Write};
+use std::env;
+use std::fs::{File, self};
+use std::os::unix::prelude::OsStrExt;
+use std::path::{Path, PathBuf};
+use clap::{arg, Args};
 
 #[derive(Args)]
 pub struct PathToSet {
@@ -18,30 +20,50 @@ impl AsRef<Path> for PathToSet {
 }
 
 pub fn set_path(PathToSet { path }: &PathToSet) {
+    let save_file_location = env::home_dir().unwrap().join(".basalt");
 
-    match Path::new(SAVE_FILE_PATH).exists() {
+    // println!("{:?}", save_file_location.join(".path"));
+    match save_file_location.join(".path").exists() {
         true => {
             let mut existing_content = String::new();
-            let mut file = File::open(SAVE_FILE_PATH).unwrap();
+            let mut file = File::open(save_file_location.join(".path")).unwrap();
             file.read_to_string(&mut existing_content).unwrap();
 
             if existing_content.is_empty() {
                 file.write_all(path.as_bytes()).unwrap()
-            }
+            };
+
+            println!("save file already exists");
+            println!("Default path set to : {}", existing_content);
         },
         false => {
-            fs::create_dir(".basalt").unwrap();
-            fs::File::create(".basalt/.path").unwrap();
-            fs::write(SAVE_FILE_PATH, path).unwrap();
+            let path_to_save = PathBuf::new().join(path);
+            if  path_to_save.exists() {  
+                fs::create_dir(save_file_location.clone()).unwrap();
+                fs::File::create(save_file_location.join(".path")).unwrap(); 
+                fs::write(save_file_location.join(".path"),
+                    path_to_save
+                        .canonicalize().unwrap()
+                        .as_path()
+                        .as_os_str()
+                        .as_bytes()
+                ).unwrap();
+
+                println!("created save file");
+                println!("Default path set to : {}", path_to_save.canonicalize().unwrap().display());
+            } else {
+                eprintln!("ERROR: specified path doesn't exist")
+            }
         }
     }
 }
 
-pub fn load_path() -> io::Result<String> {
-    let mut file = File::open(SAVE_FILE_PATH)?;
+pub fn load_path() -> io::Result<String>{
+    let save_file_location = env::home_dir().unwrap().join(".basalt/.path");
+    let mut file = File::open(save_file_location)?;
 
     let mut content = String::new();
-    file.read_to_string(&mut content)?;
+    file.read_to_string(&mut content).unwrap();
 
     Ok(content)
 }

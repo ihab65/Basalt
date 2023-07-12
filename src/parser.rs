@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum MarkdownElement {
     Note, Title, SubTask, Emtpy,
     Task, Other, SubDone,
