@@ -66,6 +66,7 @@ pub fn load_path() -> io::Result<String>{
     file.read_to_string(&mut content).unwrap();
 
     Ok(content)
+    
 }
 
 
